@@ -2164,6 +2164,7 @@ ace.define("ace/tern/tern_server",["require","exports","module","ace/range","ace
         return cls + "completion " + cls + "completion-" + suffix;
     }
     var popupSelectBound = false;
+    var scoreMap = {};
     function getCompletions(ts, editor, session, pos, prefix, callback) {
         var autoCompleteFiredTwiceInThreshold = function () {
             try {
@@ -2215,13 +2216,14 @@ ace.define("ace/tern/tern_server",["require","exports","module","ace/range","ace
                     return showError(ts, editor, error);
                 }
                 var ternCompletions = data.completions.map(function (item) {
+                    if(!scoreMap[item.name])scoreMap[item.name] = 1;
                     return {
                         iconClass: " " + (item.guess ? cls + "guess" : typeToIcon(item.type)),
                         doc: item.doc,
                         type: item.type,
                         caption: item.name,
                         value: item.name,
-                        score: 99999,
+                        score: 99999 + scoreMap[item.name],
                         meta: item.origin ? item.origin.replace(/^.*[\\\/]/, '') : "tern"
                     };
                 });
@@ -2319,6 +2321,9 @@ ace.define("ace/tern/tern_server",["require","exports","module","ace/range","ace
                     editor.completer.popup.on('select', popupSelectionChanged);
                     editor.completer.popup.on('hide', function () {
                         closeAllTips();
+                        var popup = editor.completer.popup;
+                        var v = popup.getData(popup.getRow()).value;
+                        if(scoreMap[v])scoreMap[v]++;
                     });
                     popupSelectionChanged(); //fire once after first bind
                     popupSelectBound = true; //prevent rebinding
