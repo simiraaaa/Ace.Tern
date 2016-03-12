@@ -9,7 +9,7 @@
             overflow: hidden;
             background-color: #EFEFEF;
         }
-        
+
         #editor {
             margin: 0;
             position: absolute;
@@ -19,7 +19,7 @@
             left: 0;
             border-right: 1px solid black;
         }
-        
+
         #info {
             position: absolute;
             top: 30px;
@@ -28,15 +28,15 @@
             width: 300px;
             font-size: 12px;
         }
-        
+
         .hotkeys td {
             vertical-align: top;
         }
-        
+
         .hotkeys tr td:nth-child(2) {
             padding-left: 7px;
         }
-        
+
         h3 {
             margin-top: 20px;
             margin-bottom: 3px
@@ -92,14 +92,14 @@
     <script>
         // set to false to prevent using worker, which is needed to run this from local html file due to browser security restritions
         var useWebWorker = window.location.search.toLowerCase().indexOf('noworker') == -1;
-        
-        
+
+
         //create editor
         var editor = ace.edit("editor");
         editor.getSession().setUseWorker(useWebWorker);
-        
+
         setModeFromHash(); //set editor content for demo only
-        
+
         //#region not relevant to tern, just some deafults I prefer
         editor.setTheme("ace/theme/chrome");
         editor.getSession().setUseWrapMode(true);
@@ -107,7 +107,7 @@
         editor.setShowPrintMargin(false);
         editor.$blockScrolling = Infinity;//prevents ace from logging annoying warnings
         //#endregion
-        
+
         ace.config.loadModule('ace/ext/tern', function () {
             editor.setOptions({
                 /**
@@ -153,9 +153,11 @@
                  * For javascript mode the basic auto completion will be added to completion results if tern fails to find completions or if you double tab the hotkey for get completion (default is ctrl+space, so hit ctrl+space twice rapidly to include basic text completions in the result)
                  */
                 enableBasicAutocompletion: true,
+
+                enableLiveAutocompletion: true,
             });
         });
-        
+
         //#region not relevant to tern (custom beautify plugin) and demo loading
         ace.config.loadModule('ace/ext/html_beautify', function (beautify) {
             editor.setOptions({
@@ -164,12 +166,12 @@
                 // this enables the plugin to work with hotkeys (ctrl+b to beautify)
                 htmlBeautify: true,
             });
-            
+
             //modify beautify options as needed:
             window.beautifyOptions = beautify.options;
             console.log('beautifyOptions:', beautifyOptions);
         });
-        
+
         function GetFile(file, c) {
             var xhr = new XMLHttpRequest();
             xhr.open("get", file, true);
@@ -178,7 +180,7 @@
                 if (xhr.readyState == 4) c(xhr.responseText, xhr.status);
             };
         }
-        
+
         function setModeFromHash() {
             var available = [];
             var modeSelect = document.getElementById('modeSelect');
@@ -191,14 +193,14 @@
                 setModeFromHash();
                 return;
             }
-        
+
             if (modeSelect.value != mode)
                 modeSelect.options[available.indexOf(mode)].selected = true;
-        
+
             editor.session.setMode("ace/mode/" + mode);
             GetFile(mode == 'javascript' ? 'DemoJavascript.js' : 'demo.html', function (f) {
                 editor.setValue(f);
-        
+
             });
         }
         //#endregion

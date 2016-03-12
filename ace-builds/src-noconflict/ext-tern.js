@@ -1510,7 +1510,7 @@ var Autocomplete = function() {
         var matches = [];
         var total = editor.completers.length;
         editor.completers.forEach(function(completer, i) {
-            completer.getCompletions(editor, session, pos, prefix, function(err, results) {
+            completer && completer.getCompletions(editor, session, pos, prefix, function(err, results) {
                 if (!err)
                     matches = matches.concat(results);
                 var pos = editor.getCursorPosition();
@@ -1607,7 +1607,7 @@ var Autocomplete = function() {
         if (!selected || !this.editor || !this.popup.isOpen)
             return this.hideDocTooltip();
         this.editor.completers.some(function(completer) {
-            if (completer.getDocTooltip)
+            if (completer && completer.getDocTooltip)
                 doc = completer.getDocTooltip(selected);
             return doc;
         });
@@ -3778,9 +3778,10 @@ ace.define("ace/tern/tern_server",["require","exports","module","ace/range","ace
 
 });
 
-ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/snippets","ace/autocomplete/text_completer","ace/autocomplete","ace/tern/tern_server","ace/editor"], function (require, exports, module) {
+ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/autocomplete/util","ace/snippets","ace/autocomplete/text_completer","ace/autocomplete","ace/tern/tern_server","ace/editor"], function (require, exports, module) {
     "use strict";
     var config = require("../config");
+    var util = require("../autocomplete/util");
     var snippetManager = require("../snippets").snippetManager;
     var snippetCompleter = {
         getCompletions: function (editor, session, pos, prefix, callback) {
@@ -3866,7 +3867,7 @@ ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/snipp
         var line = editor.session.getLine(pos.row);
         var prefix;
         editor.completers.forEach(function (completer) {
-            if (completer.identifierRegexps) {
+            if (completer && completer.identifierRegexps) {
                 completer.identifierRegexps.forEach(function (identifierRegex) {
                     if (!prefix && identifierRegex)
                         prefix = util.retrievePrecedingIdentifier(line, pos.column, identifierRegex);
@@ -3879,7 +3880,11 @@ ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/snipp
     var doLiveAutocomplete = function (e) {
         var editor = e.editor;
         var text = e.args || "";
-        var hasCompleter = editor.completer && editor.completer.activated;
+        if (!editor.completer) {
+          editor.execCommand("startAutocomplete");
+          editor.completer.detach();
+        }
+        var hasCompleter = editor.completer.activated;
         if (e.command.name === "backspace") {
             if (hasCompleter && !getCompletionPrefix(editor))
                 editor.completer.detach();
@@ -3887,9 +3892,6 @@ ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/snipp
         else if (e.command.name === "insertstring") {
             var prefix = getCompletionPrefix(editor);
             if (prefix && !hasCompleter) {
-                if (!editor.completer) {
-                    editor.completer = new Autocomplete();
-                }
                 editor.completer.autoInsert = false;
                 editor.completer.showPopup(editor);
             }
@@ -4027,6 +4029,18 @@ ace.define("ace/tern/tern",["require","exports","module","ace/config","ace/snipp
                     if (!this.$enableTern) {
                         this.commands.removeCommand(Autocomplete.startCommand);
                     }
+                }
+            },
+            value: false
+        },
+        enableLiveAutocompletion: {
+            set: function(val) {
+                if (val) {
+                    if (!this.completers)
+                        this.completers = Array.isArray(val)? val: completers;
+                    this.commands.on('afterExec', doLiveAutocomplete);
+                } else {
+                    this.commands.removeListener('afterExec', doLiveAutocomplete);
                 }
             },
             value: false
