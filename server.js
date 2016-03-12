@@ -2,7 +2,7 @@ var server = require('http').createServer();
 var fs = require('fs');
 
 server.on('request', function(req, res){
-  fs.readFile(__dirname + (req.url === '/' ? '/demo.html' : req.url), 'utf-8', function(err, data){
+  fs.readFile(__dirname + (req.url === '/' ? '/index.html' : req.url), 'utf-8', function(err, data){
     if(err){
       res.writeHead(404, {"Content-Type": 'text/plain'});
       res.write('not found.');
