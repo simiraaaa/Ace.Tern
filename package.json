@@ -1,0 +1,25 @@
+{
+  "name": "ace.tern",
+  "version": "1.0.0",
+  "description": "tern for ace editor",
+  "main": "demo.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://simiraaaa@github.com/simiraaaa/Ace.Tern.git"
+  },
+  "keywords": [
+    "ace",
+    "editor",
+    "tern"
+  ],
+  "author": "simiraaaa",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/simiraaaa/Ace.Tern/issues"
+  },
+  "homepage": "https://github.com/simiraaaa/Ace.Tern#readme"
+}
