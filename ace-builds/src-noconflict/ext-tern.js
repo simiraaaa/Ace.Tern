@@ -3517,7 +3517,7 @@ ace.define("ace/tern/tern_server",["require","exports","module","ace/range","ace
         });
     }
     function inJavascriptMode(editor) {
-        return getCurrentMode(editor) == 'javascript';
+        return ['javascript', 'coffee', 'typescript'].indexOf(getCurrentMode(editor)) !== -1;
     }
     function getCurrentMode(editor) {
         var scope = editor.session.$mode.$id || "";
